@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dollar Tap</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e1511">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dollar Tap">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f6f1;--card:#fff;--tx:#14201a;--mu:#66756c;--ac:#1f9d55;--ac2:#f5b301;--bd:#dfe6dc;--red:#d64545}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1511;--card:#17211b;--tx:#eaf3ec;--mu:#8da396;--ac:#33d17a;--ac2:#ffc933;--bd:#26352b;--red:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0e1511;--card:#17211b;--tx:#eaf3ec;--mu:#8da396;--ac:#33d17a;--ac2:#ffc933;--bd:#26352b;--red:#ff6b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:84px;user-select:none}
+.top{padding:14px 16px 4px;text-align:center}
+.bal{font-size:34px;font-weight:800;letter-spacing:-.5px}
+.chip{display:inline-block;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:3px 12px;font-size:13px;color:var(--mu);margin-top:4px}
+.coinw{position:relative;display:flex;justify-content:center;padding:18px 0 8px}
+.coin{width:200px;height:200px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#ffe27a,var(--ac2) 55%,#c78800);color:#6b4a00;font-size:110px;font-weight:900;box-shadow:0 8px 0 #9a6a00,0 14px 28px rgba(0,0,0,.25);cursor:pointer;touch-action:manipulation;transition:transform .05s}
+.coin:active{transform:translateY(6px) scale(.97);box-shadow:0 2px 0 #9a6a00}
+.fl{position:absolute;font-weight:800;color:var(--ac);pointer-events:none;animation:up .8s forwards;font-size:20px}
+@keyframes up{to{transform:translateY(-90px);opacity:0}}
+.shake{animation:sh .3s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.bar{height:12px;background:var(--bd);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:8px;transition:width .3s}
+.pad{padding:0 16px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin:10px 16px}
+.mu{color:var(--mu);font-size:13px}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px;cursor:pointer}
+.btn[disabled]{background:var(--bd);color:var(--mu);cursor:default}
+.btn.g{background:var(--ac2);color:#3a2900}
+h3{margin:14px 16px 0;font-size:17px}
+input{user-select:text}
+body{background-image:radial-gradient(ellipse at 50% 18%,#ffc93333,transparent 60%)}
+.bal{background:linear-gradient(90deg,var(--tx),var(--ac2),var(--tx));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 3s linear infinite}
+@keyframes shim{to{background-position:200% 0}}
+.coinw::before{content:"";position:absolute;width:310px;height:310px;top:2px;border-radius:50%;background:conic-gradient(transparent,#ffc93366,transparent 25%,#ffc93366 50%,transparent 75%);animation:spin 6s linear infinite;filter:blur(10px);pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.coin{position:relative;z-index:1;animation:glow 2.2s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 10px #ffc93388)}50%{filter:drop-shadow(0 0 30px #ffc933)}}
+.fl{color:var(--ac2);text-shadow:0 0 8px #ffc933;font-size:24px}
+.vault{border:1px solid var(--ac);box-shadow:none}
+body{background-image:none}
+.bal{background-image:linear-gradient(90deg,var(--tx),var(--ac),var(--tx))}
+.coin{background:radial-gradient(circle at 35% 30%,#7cf0ae,#1f9d55 55%,#0f6b37);color:#04321a;box-shadow:0 8px 0 #0b5a2d,0 14px 28px rgba(0,0,0,.25);animation:none;transition:filter .3s,transform .05s}
+.coin:active{box-shadow:0 2px 0 #0b5a2d}
+.coin.empty{filter:grayscale(1) brightness(.55);box-shadow:0 8px 0 #2b2b2b;cursor:not-allowed}
+.coin.empty:active{transform:none;box-shadow:0 8px 0 #2b2b2b}
+.coinw::before{background:radial-gradient(circle,rgba(51,209,122,.6) 45%,rgba(51,209,122,0) 70%);animation:aura 1.6s ease-in-out infinite;filter:none;display:none}
+.coinw.boost::before{display:block}
+@keyframes aura{0%,100%{transform:scale(.95);opacity:.7}50%{transform:scale(1.1);opacity:1}}
+.bt{text-align:center;font-weight:700;color:var(--ac);font-size:14px;min-height:18px}
+.fl{color:var(--ac);text-shadow:none;font-size:30px}
+.bar i{background:var(--ac);box-shadow:none}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:600;font-size:10.5px;padding:9px 0 7px;white-space:nowrap}
+.nav button.on::before{content:"";position:absolute;top:0;left:22%;right:22%;height:2px;background:var(--ac);border-radius:0 0 2px 2px}
+.nav button .dot{top:7px;right:28%}
+@media(max-width:400px){.nav button{font-size:9px}}
+.pad .bar{height:16px;border-radius:9px}
+.pad .bar i{border-radius:9px}
+#eb{transition:width .12s linear}
+.top{position:relative}
+.gear{position:absolute;right:14px;top:14px;width:38px;height:38px;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--mu);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.on{display:flex}
+.sheet{background:var(--card);color:var(--tx);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.sw{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 14px}
+.sw button{width:38px;height:38px;border-radius:50%;border:2px solid var(--bd);cursor:pointer;padding:0}
+.sw button.on{outline:3px solid var(--tx);outline-offset:2px}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--bd)}
+.btn{color:var(--btn,#fff)}
+.btn.red{background:var(--red);color:#fff}
+.coin{background:linear-gradient(160deg,var(--g1),var(--g2) 45%,var(--g3));-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 16px rgba(var(--rgb),.6)) drop-shadow(0 0 40px rgba(var(--rgb),.35))}
+.coinw::after{background:radial-gradient(circle,rgba(var(--rgb),.32) 0%,rgba(var(--rgb),.12) 45%,rgba(var(--rgb),0) 70%)}
+.coinw::before{background:radial-gradient(circle,rgba(var(--rgb),.6) 45%,rgba(var(--rgb),0) 70%)}
+.coin{background:none;border-radius:0;box-shadow:none;color:var(--ac);opacity:.45;font-size:180px;line-height:1;filter:none}
+.coin:active{box-shadow:none;opacity:.8}
+.coin.empty,.coin.empty:active{box-shadow:none;opacity:.2;filter:grayscale(1)}
+.coin{background:linear-gradient(160deg,#b4ffd2,#2fd37c 45%,#0f7a40);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;opacity:.7;filter:drop-shadow(0 0 16px rgba(51,209,122,.6)) drop-shadow(0 0 40px rgba(51,209,122,.35))}
+.coin:active{opacity:.95}
+.coin.empty,.coin.empty:active{opacity:.2;filter:grayscale(1)}
+.coinw::after{content:"";position:absolute;width:270px;height:270px;top:-18px;border-radius:50%;background:radial-gradient(circle,rgba(51,209,122,.32) 0%,rgba(51,209,122,.12) 45%,rgba(51,209,122,0) 70%);animation:breathe 3.2s ease-in-out infinite;pointer-events:none;z-index:0}
+@keyframes breathe{0%,100%{transform:scale(.92);opacity:.7}50%{transform:scale(1.06);opacity:1}}
+.pad .bar{height:18px;border-radius:9px}
+.pad .bar i{border-radius:9px;transition:width .12s linear,background .3s}
+.bar i{background:linear-gradient(90deg,var(--ac),var(--ac2));box-shadow:0 0 8px var(--ac2)}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{flex:1;background:none;border:0;color:var(--mu);padding:10px 0 8px;font-size:11px;cursor:pointer;position:relative}
+.nav button b{display:block;font-size:20px}
+.nav button.on{color:var(--ac)}
+.dot{position:absolute;top:6px;right:26%;width:9px;height:9px;border-radius:50%;background:var(--red)}
+.toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:14px;font-weight:600;z-index:9;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{opacity:1}
+.days{display:flex;gap:5px;margin-top:8px}
+.days div{flex:1;text-align:center;padding:6px 0;border-radius:8px;background:var(--bd);font-size:12px}
+.days div.d{background:var(--ac);color:#fff}.days div.n{outline:2px solid var(--ac2)}
+.lv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px}
+.lv:last-child{border:0}
+.demo{background:#fff6d6;color:#6b4a00;border-radius:10px;padding:8px 12px;font-size:12.5px;margin:10px 16px 0}
+.nav{overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav button{flex:0 0 auto;min-width:72px;padding-left:6px;padding-right:6px}
+.lg{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.lg button{background:var(--bg);color:var(--tx);border:2px solid var(--bd);border-radius:10px;padding:8px 10px;font-size:14px;cursor:pointer}
+.lg button.on{border-color:var(--ac)}
+.sheet{max-height:88vh;overflow-y:auto}
+.gold{position:absolute;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,#f5c518 55%,#a67c00);color:#6b4a00;font-weight:900;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:3;cursor:pointer;box-shadow:0 0 18px rgba(245,197,24,.9);animation:gpop .35s,gglow 1s infinite alternate}
+@keyframes gpop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes gglow{to{box-shadow:0 0 32px rgba(245,197,24,1)}}
+.coinw.crit::before{display:block;background:radial-gradient(circle,rgba(255,196,0,.75) 45%,rgba(255,196,0,0) 70%)}
+.nav{overflow-x:visible}
+.nav button{flex:1 1 0;min-width:0;padding:6px 2px 5px;font-size:10px;gap:2px}
+.nav button svg{width:20px;height:20px}
+.nav button>span:not(.dot){max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.nav button .dot{top:4px;right:24%}
+body{padding-bottom:64px}
+</style></head><body>
+<div class="toast" id="toast"></div>
+<div class="top"><button class="gear" data-cfg="open" aria-label="Paramètres"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><div class="mu" id="sol"></div><div class="bal" id="bal"></div><span class="chip" id="lvl"></span></div>
+<div id="view"></div>
+<div class="nav" id="nav"></div>
+<div class="ov" id="ov"></div>
+<script>
+const $=id=>document.getElementById(id);
+const LG=["fr","en","es","pt","nl","zh"],LC={fr:"fr-FR",en:"en-US",es:"es-ES",pt:"pt-PT",nl:"nl-NL",zh:"zh-CN"},FL={fr:"🇫🇷",en:"🇬🇧",es:"🇪🇸",pt:"🇵🇹",nl:"🇳🇱",zh:"🇨🇳"},LN={fr:"Français",en:"English",es:"Español",pt:"Português",nl:"Nederlands",zh:"中文"};
+const D={
+nav_play:["Gagner","Earn","Ganar","Ganhar","Verdienen","赚钱"],
+nav_shop:["Améliorer","Upgrades","Mejoras","Melhorias","Upgrades","升级"],
+shopT:["Améliorations","Upgrades","Mejoras","Melhorias","Upgrades","升级"],
+nav_miss:["Missions","Missions","Misiones","Missões","Missies","任务"],
+nav_fr:["Amis","Friends","Amigos","Amigos","Vrienden","好友"],
+nav_lv:["Niveaux","Levels","Niveles","Níveis","Niveaus","等级"],
+nav_bank:["Banque","Bank","Banco","Banco","Bank","银行"],
+nav_prem:["Premium","Premium","Premium","Premium","Premium","高级"],
+bal:["Solde","Balance","Saldo","Saldo","Saldo","余额"],
+lvl:["Niveau {n} / 100","Level {n} / 100","Nivel {n} / 100","Nível {n} / 100","Niveau {n} / 100","等级 {n} / 100"],
+nextE:["Prochaines énergies dans","Next energy in","Próxima energía en","Próxima energia em","Volgende energie over","下次能量补充"],
+perH:["+{n} énergies à chaque heure pile","+{n} energy every full hour","+{n} energías cada hora en punto","+{n} energias a cada hora cheia","+{n} energie elk heel uur","每个整点 +{n} 能量"],
+tapIs:["1 tap = +{n}","1 tap = +{n}","1 toque = +{n}","1 toque = +{n}","1 tik = +{n}","每次点击 = +{n}"],
+autoOn:["Auto-tap : {n}/s","Auto-tap: {n}/s","Auto-toque: {n}/s","Auto-toque: {n}/s","Auto-tik: {n}/s","自动点击：{n}/秒"],
+boost:["Boost x2 actif","x2 boost active","Boost x2 activo","Boost x2 ativo","x2 boost actief","x2 加成中"],
+tapsLeft:["Il te manque {n} taps pour le niveau {l}","{n} taps left to reach level {l}","Te faltan {n} toques para el nivel {l}","Faltam {n} toques para o nível {l}","Nog {n} tikken tot niveau {l}","距离 {l} 级还差 {n} 次点击"],
+maxLvl:["Niveau maximum atteint","Max level reached","Nivel máximo alcanzado","Nível máximo atingido","Maximaal niveau bereikt","已达最高等级"],
+nextTier:["Prochain palier","Next tier","Próximo nivel","Próximo nível","Volgend niveau","下一级"],
+noEn:["Plus d’énergie ! Attends l’heure suivante ou passe en Premium.","Out of energy! Wait for the next hour or go Premium.","¡Sin energía! Espera a la próxima hora o pasa a Premium.","Sem energia! Espera a próxima hora ou passa a Premium.","Geen energie meer! Wacht tot het volgende uur of ga Premium.","能量用完了！请等待下一个整点或升级高级版。"],
+hourE:["+{n} énergies !","+{n} energy!","¡+{n} energías!","+{n} energias!","+{n} energie!","+{n} 能量！"],
+bought:["Amélioration achetée !","Upgrade bought!","¡Mejora comprada!","Melhoria comprada!","Upgrade gekocht!","升级成功！"],
+lvUp:["Niveau {n} atteint ! Réclame ta récompense.","Level {n} reached! Claim your reward.","¡Nivel {n} alcanzado! Reclama tu recompensa.","Nível {n} atingido! Recebe a tua recompensa.","Niveau {n} bereikt! Claim je beloning.","达到 {n} 级！快去领取奖励。"],
+toBank:["{n} $ transférés sur ton compte banque !","{n} $ moved to your bank account!","¡{n} $ transferidos a tu cuenta bancaria!","{n} $ transferidos para a tua conta bancária!","{n} $ overgemaakt naar je bankrekening!","{n} $ 已转入你的银行账户！"],
+copied:["Lien copié : {l}","Link copied: {l}","Enlace copiado: {l}","Link copiado: {l}","Link gekopieerd: {l}","链接已复制：{l}"],
+friendJ:["Ami rejoint !","Friend joined!","¡Amigo unido!","Amigo juntou-se!","Vriend toegevoegd!","好友已加入！"],
+noWd:["Retrait non activé : les $ sont virtuels dans cette démo.","Withdrawals are not enabled: $ are virtual in this demo.","Retiro no activado: los $ son virtuales en esta demo.","Levantamento não ativado: os $ são virtuais nesta demo.","Opnemen niet actief: $ is virtueel in deze demo.","提现未开启：本演示中的 $ 为虚拟货币。"],
+mailBad:["E-mail invalide ou consentement non coché","Invalid e-mail or consent not ticked","E-mail no válido o consentimiento sin marcar","E-mail inválido ou consentimento por marcar","Ongeldig e-mailadres of toestemming niet aangevinkt","邮箱无效或未勾选同意"],
+reset:["Partie remise à zéro","Game reset to zero","Partida reiniciada a cero","Jogo reposto a zero","Spel teruggezet naar nul","游戏已重置为零"],
+refPay:["{n} de commissions de parrainage","{n} in referral commissions","{n} en comisiones de referidos","{n} em comissões de referência","{n} aan referral-commissie","{n} 推荐佣金"],
+tapV:["Valeur du tap","Tap value","Valor del toque","Valor do toque","Waarde per tik","点击价值"],
+perTap:["{a} → {b} par tap","{a} → {b} per tap","{a} → {b} por toque","{a} → {b} por toque","{a} → {b} per tik","{a} → {b} 每次点击"],
+enH:["Énergies par heure","Energy per hour","Energía por hora","Energia por hora","Energie per uur","每小时能量"],
+enHa:["{a} → {b} énergies / heure","{a} → {b} energy / hour","{a} → {b} energías / hora","{a} → {b} energias / hora","{a} → {b} energie / uur","{a} → {b} 能量/小时"],
+lv:["niv. {n}","lvl {n}","niv. {n}","nív. {n}","niv. {n}","{n} 级"],
+shopNote:["Le prix des améliorations est déduit de ton solde, mais pas de ta progression de niveau.","Upgrade prices are deducted from your balance, not from your level progress.","El precio de las mejoras se descuenta de tu saldo, no de tu progreso de nivel.","O preço das melhorias é descontado do teu saldo, não do teu progresso de nível.","De prijs van upgrades gaat van je saldo af, niet van je niveauvoortgang.","升级费用从余额中扣除，不影响等级进度。"],
+auto:["Auto-tap","Auto-tap","Auto-toque","Auto-toque","Auto-tik","自动点击"],
+autoLock:["Se débloque au niveau 10","Unlocks at level 10","Se desbloquea en el nivel 10","Desbloqueia no nível 10","Ontgrendelt op niveau 10","10 级解锁"],
+autoD:["{a} → {b} taps par seconde (1 énergie par tap)","{a} → {b} taps per second (1 energy per tap)","{a} → {b} toques por segundo (1 energía por toque)","{a} → {b} toques por segundo (1 energia por toque)","{a} → {b} tikken per seconde (1 energie per tik)","{a} → {b} 次/秒（每次消耗 1 能量）"],
+daily:["Connexion quotidienne","Daily login","Conexión diaria","Ligação diária","Dagelijkse login","每日登录"],
+streak:["Série : {n} j","Streak: {n} d","Racha: {n} d","Sequência: {n} d","Reeks: {n} d","连续 {n} 天"],
+comeBack:["Reviens chaque jour pour de plus gros bonus","Come back every day for bigger bonuses","Vuelve cada día para bonos mayores","Volta todos os dias para bónus maiores","Kom elke dag terug voor grotere bonussen","每天回来领取更大奖励"],
+taken:["Déjà pris","Claimed","Ya recibido","Já recebido","Al opgehaald","已领取"],
+dm:["Missions du jour","Daily missions","Misiones del día","Missões do dia","Dagmissies","每日任务"],
+spM:["Mission spéciale du jour","Special mission of the day","Misión especial del día","Missão especial do dia","Speciale missie van de dag","今日特别任务"],
+claim:["Réclamer","Claim","Reclamar","Receber","Claimen","领取"],
+claimed:["Réclamé","Claimed","Reclamado","Recebido","Geclaimd","已领取"],
+rew:["récompense {n} ⚡","reward {n} ⚡","recompensa {n} ⚡","recompensa {n} ⚡","beloning {n} ⚡","奖励 {n} ⚡"],
+m_taps:["Faire {n} taps","Do {n} taps","Haz {n} toques","Faz {n} toques","Doe {n} tikken","点击 {n} 次"],
+m_buy:["Acheter 1 amélioration","Buy 1 upgrade","Compra 1 mejora","Compra 1 melhoria","Koop 1 upgrade","购买 1 次升级"],
+m_earn:["Gagner {n} $ aujourd’hui","Earn {n} $ today","Gana {n} $ hoy","Ganha {n} $ hoje","Verdien vandaag {n} $","今天赚 {n} $"],
+m_login:["Réclamer ton bonus de connexion","Claim your login bonus","Reclama tu bono de conexión","Recebe o teu bónus de ligação","Claim je loginbonus","领取登录奖励"],
+ref:["Parrainage","Referral","Referidos","Convites","Uitnodigen","邀请"],
+inv5:["Invite 5 amis : +400 ⚡","Invite 5 friends: +400 ⚡","Invita a 5 amigos: +400 ⚡","Convida 5 amigos: +400 ⚡","Nodig 5 vrienden uit: +400 ⚡","邀请 5 位好友：+400 ⚡"],
+then60:["Ensuite +60 énergies par ami invité","Then +60 energy per invited friend","Después +60 energías por amigo invitado","Depois +60 energias por amigo convidado","Daarna +60 energie per uitgenodigde vriend","之后每邀请 1 位好友 +60 能量"],
+invd:["Amis invités : {n}","Friends invited: {n}","Amigos invitados: {n}","Amigos convidados: {n}","Uitgenodigde vrienden: {n}","已邀请好友：{n}"],
+code:["Ton code","Your code","Tu código","O teu código","Jouw code","你的邀请码"],
+copyL:["Copier mon lien","Copy my link","Copiar mi enlace","Copiar o meu link","Kopieer mijn link","复制我的链接"],
+sim:["Simuler un ami (démo)","Simulate a friend (demo)","Simular un amigo (demo)","Simular um amigo (demo)","Vriend simuleren (demo)","模拟好友（演示）"],
+pct5:["Pour chaque ami parrainé, tu gagnes 5 % de ce qu’il gagne chaque jour. Rien n’est retiré à ton ami.","For each friend you invite, you earn 5% of what they earn each day. Nothing is taken from your friend.","Por cada amigo invitado, ganas el 5 % de lo que gana cada día. A tu amigo no se le quita nada.","Por cada amigo convidado, ganhas 5 % do que ele ganha por dia. Nada é retirado ao teu amigo.","Voor elke uitgenodigde vriend verdien je 5% van wat hij per dag verdient. Je vriend verliest niets.","每邀请一位好友，你每天可获得其收益的 5%，好友的收益不会减少。"],
+bon:["Bonus uniques","One-time bonuses","Bonos únicos","Bónus únicos","Eenmalige bonussen","一次性奖励"],
+mailB:["Ton e-mail : +150 ⚡","Your e-mail: +150 ⚡","Tu e-mail: +150 ⚡","O teu e-mail: +150 ⚡","Jouw e-mail: +150 ⚡","你的邮箱：+150 ⚡"],
+saved:["Enregistré","Saved","Guardado","Guardado","Opgeslagen","已保存"],
+consent:["J’accepte de recevoir des nouvelles du jeu","I agree to receive news about the game","Acepto recibir novedades del juego","Aceito receber novidades do jogo","Ik ga akkoord met nieuws over het spel","我同意接收游戏资讯"],
+ok:["Valider","Submit","Validar","Validar","Bevestigen","提交"],
+tgB:["Canal Telegram : +500 ⚡","Telegram channel: +500 ⚡","Canal de Telegram: +500 ⚡","Canal do Telegram: +500 ⚡","Telegram-kanaal: +500 ⚡","Telegram 频道：+500 ⚡"],
+tgD:["Rejoins le canal officiel","Join the official channel","Únete al canal oficial","Junta-te ao canal oficial","Word lid van het officiële kanaal","加入官方频道"],
+join:["Rejoindre","Join","Unirse","Juntar","Deelnemen","加入"],
+done:["Fait","Done","Hecho","Feito","Klaar","完成"],
+tiers:["Paliers ({a}/100)","Tiers ({a}/100)","Niveles ({a}/100)","Níveis ({a}/100)","Niveaus ({a}/100)","等级（{a}/100）"],
+toClaim:["{n} récompense(s) à réclamer","{n} reward(s) to claim","{n} recompensa(s) por reclamar","{n} recompensa(s) por receber","{n} beloning(en) te claimen","{n} 个奖励待领取"],
+noRew:["Aucune récompense en attente","No rewards waiting","Ninguna recompensa pendiente","Nenhuma recompensa pendente","Geen beloningen in afwachting","暂无待领奖励"],
+claimAll:["Tout réclamer","Claim all","Reclamar todo","Receber tudo","Alles claimen","全部领取"],
+lvN:["Niveau {n}","Level {n}","Nivel {n}","Nível {n}","Niveau {n}","{n} 级"],
+bankA:["Compte banque","Bank account","Cuenta bancaria","Conta bancária","Bankrekening","银行账户"],
+wdFrom:["Retrait possible à partir de {n} $","Withdrawal possible from {n} $","Retiro posible a partir de {n} $","Levantamento possível a partir de {n} $","Opnemen mogelijk vanaf {n} $","满 {n} $ 可提现"],
+wd:["Retirer","Withdraw","Retirar","Levantar","Opnemen","提现"],
+nextTr:["Prochain transfert","Next transfer","Próxima transferencia","Próxima transferência","Volgende overboeking","下次转账"],
+bankN:["À {n} $ de solde, la somme est transférée ici et ton solde retombe à 0 $. Chaque dépense en améliorations réduit ton solde de monnaie virtuelle.","At {n} $ of balance, the amount is moved here and your balance drops to 0 $. Every upgrade purchase reduces your virtual currency balance.","Al llegar a {n} $ de saldo, la suma se transfiere aquí y tu saldo vuelve a 0 $. Cada gasto en mejoras reduce tu saldo de moneda virtual.","Ao chegar a {n} $ de saldo, o valor é transferido para aqui e o teu saldo volta a 0 $. Cada gasto em melhorias reduz o teu saldo de moeda virtual.","Bij {n} $ saldo wordt het bedrag hierheen overgemaakt en gaat je saldo naar 0 $. Elke uitgave aan upgrades verlaagt je saldo in virtuele munt.","余额达到 {n} $ 时，该金额会转入此处，余额归零。每次购买升级都会减少你的虚拟货币余额。"],
+hist:["Historique des opérations","Transaction history","Historial de operaciones","Histórico de operações","Transactiegeschiedenis","交易记录"],
+noOps:["Aucune opération pour le moment","No transactions yet","Aún no hay operaciones","Ainda sem operações","Nog geen transacties","暂无交易"],
+h_bank:["Transfert vers la banque","Transfer to bank","Transferencia al banco","Transferência para o banco","Overboeking naar bank","转入银行"],
+h_ref:["Commissions de parrainage (5 %)","Referral commissions (5%)","Comisiones de referidos (5 %)","Comissões de referência (5 %)","Referral-commissie (5%)","推荐佣金（5%）"],
+h_tl:["Amélioration : valeur du tap","Upgrade: tap value","Mejora: valor del toque","Melhoria: valor do toque","Upgrade: waarde per tik","升级：点击价值"],
+h_rl:["Amélioration : énergies par heure","Upgrade: energy per hour","Mejora: energía por hora","Melhoria: energia por hora","Upgrade: energie per uur","升级：每小时能量"],
+h_at:["Amélioration : auto-tap","Upgrade: auto-tap","Mejora: auto-toque","Melhoria: auto-toque","Upgrade: auto-tik","升级：自动点击"],
+h_pack:["Pack premium {x}","Premium pack {x}","Pack premium {x}","Pack premium {x}","Premiumpakket {x}","高级礼包 {x}"],
+frT:["Mes amis","My friends","Mis amigos","Os meus amigos","Mijn vrienden","我的好友"],
+frN:["{n} ami(s) parrainé(s)","{n} friend(s) invited","{n} amigo(s) invitado(s)","{n} amigo(s) convidado(s)","{n} vriend(en) uitgenodigd","已邀请 {n} 位好友"],
+frTonight:["Commission ce soir (estimée)","Tonight’s commission (estimated)","Comisión de esta noche (estimada)","Comissão desta noite (estimada)","Commissie vanavond (geschat)","今晚佣金（预估）"],
+frRecv:["Commissions déjà reçues","Commissions received","Comisiones recibidas","Comissões recebidas","Ontvangen commissies","已收佣金"],
+frToday:["aujourd’hui","today","hoy","hoje","vandaag","今日"],
+frTot:["total","total","total","total","totaal","累计"],
+noFr:["Aucun ami pour l’instant. Partage ton lien !","No friends yet. Share your link!","Aún no tienes amigos. ¡Comparte tu enlace!","Ainda sem amigos. Partilha o teu link!","Nog geen vrienden. Deel je link!","还没有好友，快分享你的链接吧！"],
+frDemo:["Démo : les gains des amis sont simulés. Avec le bot Telegram, ce seront les vrais.","Demo: friends’ earnings are simulated. With the Telegram bot they will be real.","Demo: las ganancias de los amigos son simuladas. Con el bot de Telegram serán reales.","Demo: os ganhos dos amigos são simulados. Com o bot do Telegram serão reais.","Demo: de winsten van vrienden zijn gesimuleerd. Met de Telegram-bot worden ze echt.","演示：好友收益为模拟数据，接入 Telegram 机器人后将为真实数据。"],
+test:["Mode test : les paiements ne sont pas encore connectés, les packs sont crédités gratuitement.","Test mode: payments are not connected yet, packs are credited for free.","Modo de prueba: los pagos aún no están conectados, los packs se acreditan gratis.","Modo de teste: os pagamentos ainda não estão ligados, os packs são creditados grátis.","Testmodus: betalingen zijn nog niet gekoppeld, pakketten worden gratis bijgeschreven.","测试模式：支付尚未接入，礼包免费发放。"],
+packs:["Packs Premium","Premium packs","Packs Premium","Packs Premium","Premiumpakketten","高级礼包"],
+adapt:["Les boosts s’adaptent à ta progression (niveau {n}).","Boosts scale with your progress (level {n}).","Los boosts se adaptan a tu progreso (nivel {n}).","Os boosts adaptam-se ao teu progresso (nível {n}).","Boosts schalen mee met je voortgang (niveau {n}).","加成会随你的进度（{n} 级）而变化。"],
+pk:["Pack {l}","Pack {l}","Pack {l}","Pack {l}","Pakket {l}","礼包 {l}"],
+pkD:["+{e} ⚡ · tous les taps x2 pendant {m} min","+{e} ⚡ · all taps x2 for {m} min","+{e} ⚡ · todos los toques x2 durante {m} min","+{e} ⚡ · todos os toques x2 durante {m} min","+{e} ⚡ · alle tikken x2 gedurende {m} min","+{e} ⚡ · 所有点击 x2，持续 {m} 分钟"],
+payOpen:["Paiement ouvert : tes énergies seront créditées après confirmation","Payment opened: your energy will be credited after confirmation","Pago abierto: tus energías se acreditarán tras la confirmación","Pagamento aberto: as tuas energias serão creditadas após confirmação","Betaling geopend: je energie wordt na bevestiging bijgeschreven","已打开支付页面：确认后将发放能量"],
+pkT:["Pack {l} (test) : +{e} ⚡","Pack {l} (test): +{e} ⚡","Pack {l} (prueba): +{e} ⚡","Pack {l} (teste): +{e} ⚡","Pakket {l} (test): +{e} ⚡","礼包 {l}（测试）：+{e} ⚡"],
+set:["Paramètres","Settings","Ajustes","Definições","Instellingen","设置"],
+col:["Couleur du jeu","Game color","Color del juego","Cor do jogo","Spelkleur","游戏颜色"],
+snd:["Son des taps","Tap sound","Sonido de toques","Som dos toques","Geluid van tikken","点击音效"],
+on:["Activé","On","Activado","Ativado","Aan","开"],
+off:["Désactivé","Off","Desactivado","Desativado","Uit","关"],
+rstT:["Recommencer à zéro","Start over from zero","Empezar de cero","Recomeçar do zero","Opnieuw beginnen","从零重新开始"],
+rstD:["Efface toute ta progression","Erases all your progress","Borra todo tu progreso","Apaga todo o teu progresso","Wist al je voortgang","清除所有进度"],
+rstB:["Réinitialiser","Reset","Reiniciar","Repor","Resetten","重置"],
+conf:["Confirmer","Confirm","Confirmar","Confirmar","Bevestigen","确认"],
+close:["Fermer","Close","Cerrar","Fechar","Sluiten","关闭"],
+lang:["Langue","Language","Idioma","Idioma","Taal","语言"],
+nav_top:["Classement","Ranking","Ranking","Ranking","Ranglijst","排行榜"],
+chestT:["Coffre quotidien","Daily chest","Cofre diario","Baú diário","Dagelijkse kist","每日宝箱"],
+chestD:["Une surprise à ouvrir chaque jour","A surprise to open every day","Una sorpresa cada día","Uma surpresa todos os dias","Elke dag een verrassing","每天一份惊喜"],
+chestOpen:["Ouvrir","Open","Abrir","Abrir","Openen","打开"],
+chestToast:["Coffre : {r}","Chest: {r}","Cofre: {r}","Baú: {r}","Kist: {r}","宝箱：{r}"],
+lbDay:["Jour","Day","Día","Dia","Dag","今日"],
+lbWeek:["Semaine","Week","Semana","Semana","Week","本周"],
+lbRew:["Top 10 : +{a} ⚡ (jour) · +{b} ⚡ (semaine)","Top 10: +{a} ⚡ (day) · +{b} ⚡ (week)","Top 10: +{a} ⚡ (día) · +{b} ⚡ (semana)","Top 10: +{a} ⚡ (dia) · +{b} ⚡ (semana)","Top 10: +{a} ⚡ (dag) · +{b} ⚡ (week)","前 10 名：+{a} ⚡（日）· +{b} ⚡（周）"],
+lbPrize:["Top 10 ({p}) : +{n} ⚡","Top 10 ({p}): +{n} ⚡","Top 10 ({p}): +{n} ⚡","Top 10 ({p}): +{n} ⚡","Top 10 ({p}): +{n} ⚡","前 10 名（{p}）：+{n} ⚡"],
+lbYou:["Toi","You","Tú","Tu","Jij","你"],
+lbRank:["Ta place : {n}","Your rank: {n}","Tu puesto: {n}","O teu lugar: {n}","Jouw plek: {n}","你的名次：{n}"],
+lbDemo:["Démo : les autres joueurs sont simulés. Le vrai classement viendra avec le serveur.","Demo: other players are simulated. The real ranking will come with the server.","Demo: los demás jugadores son simulados. La clasificación real llegará con el servidor.","Demo: os outros jogadores são simulados. O ranking real virá com o servidor.","Demo: andere spelers zijn gesimuleerd. De echte ranglijst komt met de server.","演示：其他玩家为模拟数据，真实排行榜需接入服务器。"],
+gift:["Offrir {n} ⚡","Gift {n} ⚡","Regalar {n} ⚡","Oferecer {n} ⚡","Geef {n} ⚡","赠送 {n} ⚡"],
+giftSent:["Cadeau envoyé à {n} !","Gift sent to {n}!","¡Regalo enviado a {n}!","Presente enviado a {n}!","Cadeau gestuurd naar {n}!","已向 {n} 赠送礼物！"],
+giftDone:["Envoyé","Sent","Enviado","Enviado","Verstuurd","已赠送"],
+notif:["Rappel Telegram quand l’énergie est pleine","Telegram reminder when energy is full","Recordatorio de Telegram con la energía llena","Lembrete do Telegram quando a energia estiver cheia","Telegram-herinnering bij volle energie","能量已满时通过 Telegram 提醒"],
+soT:["Offre de départ","Starter offer","Oferta de inicio","Oferta de início","Startaanbieding","新手特惠"],
+soLeft:["Une seule fois · se termine dans {t}","One time only · ends in {t}","Solo una vez · termina en {t}","Só uma vez · termina em {t}","Eenmalig · eindigt over {t}","限购一次 · 剩余 {t}"],
+passT:["Pass de saison","Season pass","Pase de temporada","Passe de temporada","Seizoenspas","赛季通行证"],
+passD:["{n} ⚡ chaque jour + boost x2 de {m} min tous les 7 jours","{n} ⚡ every day + x2 boost for {m} min every 7 days","{n} ⚡ cada día + boost x2 de {m} min cada 7 días","{n} ⚡ por dia + boost x2 de {m} min a cada 7 dias","{n} ⚡ per dag + x2 boost van {m} min elke 7 dagen","每天 {n} ⚡，每 7 天 x2 加成 {m} 分钟"],
+passLeft:["Actif : {n} jour(s) restant(s)","Active: {n} day(s) left","Activo: quedan {n} día(s)","Ativo: restam {n} dia(s)","Actief: nog {n} dag(en)","生效中：剩余 {n} 天"],
+passPer:["{p} / mois","{p} / month","{p} / mes","{p} / mês","{p} / maand","{p} / 月"],
+skT:["Apparences du dollar","Dollar skins","Aspectos del dólar","Aspetos do dólar","Dollar-skins","美元外观"],
+skD:["Purement cosmétique : aucun avantage dans le jeu.","Purely cosmetic: no in-game advantage.","Solo estético: sin ventajas en el juego.","Apenas estético: sem vantagens no jogo.","Puur cosmetisch: geen voordeel in het spel.","仅为外观，不影响游戏数值。"],
+sk_classic:["Classique","Classic","Clásico","Clássico","Klassiek","经典"],
+sk_gold:["Or","Gold","Oro","Ouro","Goud","黄金"],
+sk_neon:["Néon","Neon","Neón","Néon","Neon","霓虹"],
+sk_diamond:["Diamant","Diamond","Diamante","Diamante","Diamant","钻石"],
+skEq:["Équiper","Equip","Equipar","Equipar","Gebruiken","装备"],
+skOn:["Équipé","Equipped","Equipado","Equipado","In gebruik","已装备"],
+crit:["Critique x{n} pendant 1 min !","Critical x{n} for 1 min!","¡Crítico x{n} durante 1 min!","Crítico x{n} durante 1 min!","Kritiek x{n} gedurende 1 min!","暴击 x{n}，持续 1 分钟！"],
+gcT:["Pièces bonus","Bonus coins","Monedas bonus","Moedas bónus","Bonusmunten","奖励金币"],
+gcLock:["Se débloque au niveau 5","Unlocks at level 5","Se desbloquea en el nivel 5","Desbloqueia no nível 5","Ontgrendelt op niveau 5","5 级解锁"],
+gcD:["Une pièce dorée toutes les ~{s} s (jusqu’à {m} ⚡)","A golden coin every ~{s} s (up to {m} ⚡)","Una moneda dorada cada ~{s} s (hasta {m} ⚡)","Uma moeda dourada a cada ~{s} s (até {m} ⚡)","Elke ~{s} s een gouden munt (tot {m} ⚡)","每约 {s} 秒出现金币（最多 {m} ⚡）"],
+h_gc:["Amélioration : pièces bonus","Upgrade: bonus coins","Mejora: monedas bonus","Melhoria: moedas bónus","Upgrade: bonusmunten","升级：奖励金币"],
+payErr:["Paiement indisponible, réessaie plus tard","Payment unavailable, try again later","Pago no disponible, inténtalo más tarde","Pagamento indisponível, tenta mais tarde","Betaling niet beschikbaar, probeer later opnieuw","支付暂不可用，请稍后再试"],
+chLock:["Coffre quotidien : à acheter dans Améliorer (niveau 3)","Daily chest: buy it in Upgrades (level 3)","Cofre diario: cómpralo en Mejoras (nivel 3)","Baú diário: compra-o em Melhorias (nível 3)","Dagelijkse kist: koop hem bij Upgrades (niveau 3)","每日宝箱：3 级后在升级页购买"],
+chD:["Un coffre à ouvrir chaque jour (achat unique)","A chest to open every day (one-time purchase)","Un cofre cada día (compra única)","Um baú todos os dias (compra única)","Elke dag een kist (eenmalige aankoop)","每天可开启一次宝箱（一次性购买）"],
+cxT:["Tap critique","Critical tap","Toque crítico","Toque crítico","Kritieke tik","暴击点击"],
+cxD:["4 % de chances par tap : x2 ou x3 pendant 1 min (achat unique)","4% chance per tap: x2 or x3 for 1 min (one-time purchase)","4 % de probabilidad por toque: x2 o x3 durante 1 min (compra única)","4 % de hipótese por toque: x2 ou x3 durante 1 min (compra única)","4% kans per tik: x2 of x3 gedurende 1 min (eenmalige aankoop)","每次点击 4% 概率：1 分钟内 x2 或 x3（一次性购买）"],
+lockN:["Se débloque au niveau {n}","Unlocks at level {n}","Se desbloquea en el nivel {n}","Desbloqueia no nível {n}","Ontgrendelt op niveau {n}","{n} 级解锁"],
+owned:["Acheté","Owned","Comprado","Comprado","Gekocht","已购买"],
+h_ch:["Achat : coffre quotidien","Purchase: daily chest","Compra: cofre diario","Compra: baú diário","Aankoop: dagelijkse kist","购买：每日宝箱"],
+h_cx:["Achat : tap critique","Purchase: critical tap","Compra: toque crítico","Compra: toque crítico","Aankoop: kritieke tik","购买：暴击点击"],
+critT:["Critique x{n}","Critical x{n}","Crítico x{n}","Crítico x{n}","Kritiek x{n}","暴击 x{n}"],
+};
+const KEY="dollartap21",GOAL=1360,AUTO_LV=10,AUTO_COST=1000,COMM=0.05,PAYOUT_REAL=false,PASS_E=300,GIFT=20,CH_COST=10,CX_COST=50,LBD=100,LBW=500,SO={l:"1 €",e:1500,m:20,url:""};
+const T=Array.from({length:100},(_,i)=>+(5*Math.pow(i+1,2.1)).toFixed(2));
+const lvReward=i=>Math.round((100+10*i+0.5*i*i)/10)*10;
+const tapVal=l=>0.001*(1+l),hourly=l=>50+25*l;
+const tapCost=l=>+(0.045*Math.pow(1.7,l)).toFixed(3),regCost=l=>+(0.048*Math.pow(1.65,l)).toFixed(3);
+const PACKS=[{l:"0,50 €",e:100,m:0,url:""},{l:"2 €",e:1000,m:10,url:""},{l:"5 €",e:3000,m:15,url:""},{l:"10 €",e:7000,m:30,url:""},{l:"20 €",e:16000,m:60,url:""}];
+const ic=d=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const IC={play:ic(`<circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.5-.8-1.4-1.2-2.5-1.2-1.5 0-2.5.8-2.5 1.9 0 2.7 5 1.3 5 4 0 1.1-1 2-2.5 2-1.1 0-2-.4-2.5-1.2M12 6.5V8m0 8v1.5"/>`),shop:ic(`<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>`),miss:ic(`<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>`),fr:ic(`<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5a3 3 0 010 6M17 14c2.5.4 4 2.6 4 6"/>`),lvls:ic(`<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/>`),bank:ic(`<path d="M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/>`),top:ic(`<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>`),prem:ic(`<path d="M6 4h12l3 5-9 11L3 9zM3 9h18M9 4l3 5 3-5"/>`)};
+const today=()=>new Date().toDateString(),hk=()=>Math.floor(Date.now()/36e5),wkKey=()=>Math.floor((Date.now()/864e5+3)/7);
+const SK={classic:null,gold:{g:["#fff3b0","#f5c518","#a67c00"],rgb:"245,197,24",p:"1,99 €",url:""},neon:{g:["#ffffff","#ff4df0","#00e5ff"],rgb:"255,77,240",p:"2,99 €",url:""},diamond:{g:["#ffffff","#a5f3fc","#38bdf8"],rgb:"125,211,252",p:"4,99 €",url:""}};
+const skinStyle=()=>{const k=SK[S.sk.cur];return k?`--g1:${k.g[0]};--g2:${k.g[1]};--g3:${k.g[2]};--rgb:${k.rgb}`:""};
+const NM=["Alex","Maya","Lucas","Zoé","Noah","Lina","Hugo","Mila","Theo","Sofia","Liam","Nora","Leo","Ivy","Max","Eva","Sam","Ana","Ben","Lou","Jade","Tom","Rita","Dan","Kim","Joe","Mia","Ryo","Chen","Pia"];
+const rn=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0)%10000/10000};
+const bots=(key,sc)=>NM.map((n,i)=>({n,s:+(sc*(.15+rn(key+n)*1.35)*(1-i/60)).toFixed(3)}));
+const rk=(key,s,sc)=>1+bots(key,sc).filter(b=>b.s>s).length;
+const mkM=()=>({d:today(),taps:0,buys:0,earned:0,login:0,c:[0,0,0,0]});
+const fresh=()=>({money:0,total:0,energy:50,tl:0,rl:0,at:0,claimed:0,hk:hk(),boost:0,streak:0,last:"",bank:0,email:"",tg:0,code:Math.random().toString(36).slice(2,8).toUpperCase(),m:mkM(),fr:[],h:[],rc:0,cd:today(),t0:Date.now(),gc:0,ch:0,cx:0,ap:[],so:0,pass:0,pd:"",pn:0,sk:{own:["classic"],cur:"classic"},chest:"",gd:{d:"",s:[]},wk:{k:wkKey(),e:0},cr:null,notif:0,tut:0});
+let S=fresh();
+try{const s=localStorage.getItem(KEY);if(s)S=Object.assign(S,JSON.parse(s))}catch(e){}
+if(!S.lang){const n=(navigator.language||"fr").slice(0,2);S.lang=LG.includes(n)?n:"en"}
+let SV=0,PAY_LIVE=false,SERVER=false,tab="play",RC=0,AC,lbv="day",GN=Date.now()+25e3+Math.random()*35e3,GE=null;
+const L=(k,o)=>{const a=D[k]||[];let s=a[LG.indexOf(S.lang)]||a[1]||k;if(o)for(const x in o)s=s.split("{"+x+"}").join(o[x]);return s};
+const TG=window.Telegram&&window.Telegram.WebApp;if(TG){try{TG.ready();TG.expand()}catch(e){}}
+const gid=(()=>{try{let g=localStorage.getItem("dt_gid");if(!g){g=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,"0")).join("");localStorage.setItem("dt_gid",g)}return g}catch(e){return ""}})();
+const auth=()=>({init:TG&&TG.initData||"",guest:gid});
+const api=(p,b)=>fetch("/api/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({auth:auth()},b||{}))}).then(r=>{if(!r.ok)throw 0;return r.json()});
+let pt=0,BOTU="";
+const notif=(kind,data)=>{if(SERVER&&TG&&TG.initData)api("notify",{kind,data}).catch(()=>{})};
+const refLink=()=>{const u=TG&&TG.initDataUnsafe&&TG.initDataUnsafe.user;return BOTU&&u?"https://t.me/"+BOTU+"?start=ref_"+u.id:"https://t.me/TonBot?start="+S.code};
+async function pollFriends(){if(!SERVER)return;try{const r=await api("friends");S.fr=r.friends.map(f=>({n:f.n,t:f.t,d:f.md===today()?f.e:0,r:0}));if(tab==="top"&&lbv==="fr")render()}catch(e){}}
+const save=()=>{S.ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(SERVER&&!pt)pt=setTimeout(()=>{pt=0;api("save",{state:S}).catch(()=>{})},4000)};
+function flush(){S.ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(SERVER){try{navigator.sendBeacon("/api/save",new Blob([JSON.stringify({auth:auth(),state:S})],{type:"application/json"}))}catch(e){}}}
+function applyCredit(id){const lv=level();
+ if(/^p\d$/.test(id)){const p=PACKS[+id[1]],q=Math.round(p.m?p.e*(1+lv/20):p.e);S.energy+=q;S.boost=Math.max(S.boost,Date.now())+p.m*6e4;log("pack",0,p.l);toast("💎 "+L("pkT",{l:p.l,e:nf(q)}))}
+ else if(id==="so"){S.so=1;S.energy+=SO.e;S.boost=Math.max(S.boost,Date.now())+SO.m*6e4;log("pack",0,SO.l);toast("💎 "+L("soT"))}
+ else if(id==="pass"){S.pass=Math.max(S.pass,Date.now())+30*864e5;log("pack",0,"Pass");toast("⭐ "+L("passT"))}
+ else if(id.startsWith("friend:")){const n=+id.slice(7),r=n===5?400:n>5?60:0;S.energy+=r;toast("👥 "+L("friendJ")+" "+(r?L("hourE",{n:r}):n+" / 5"))}
+ else if(id.startsWith("commission:")){const c=+id.slice(11);S.money+=c;S.total+=c;S.rc+=c;log("ref",c);toast("👥 "+L("refPay",{n:$$(c)}));bankChk()}
+ else if(id.startsWith("sk_")){const k=id.slice(3);if(SK[k]&&!S.sk.own.includes(k)){S.sk.own.push(k);S.sk.cur=k;log("pack",0,L("sk_"+k));toast("✨ "+L("sk_"+k))}}}
+async function pollCredits(){if(!SERVER)return;try{const r=await api("credits");if(!r.credits||!r.credits.length)return;const ids=[];r.credits.forEach(c=>{if(!S.ap.includes(c.id)){applyCredit(c.item);S.ap.push(c.id);if(S.ap.length>50)S.ap.shift()}ids.push(c.id)});applyTheme();save();await api("ack",{ids});render()}catch(e){}}
+function buyOrder(id){api("order",{item:id}).then(r=>{if(!r.url)throw 0;if(TG&&TG.openLink)TG.openLink(r.url);else window.open(r.url,"_blank");toast(L("payOpen"))}).catch(()=>toast("⚠️ "+L("payErr")))}
+async function boot(){try{const h=await api("health");if(!h.ok)return;SERVER=true;PAY_LIVE=true;api("config").then(c=>{BOTU=c.bot||""}).catch(()=>{});const r=await api("load");if(r.state&&(!S.ts||r.state.ts>S.ts)){S=Object.assign(fresh(),r.state);if(!S.lang)S.lang="fr";applyTheme()}else save();chk();render();pollCredits();setInterval(pollCredits,20000);pollFriends();setInterval(pollFriends,60000)}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(document.hidden)flush();else pollCredits()});
+window.addEventListener("pagehide",flush);window.addEventListener("beforeunload",flush);
+const nf=n=>Math.round(n).toLocaleString(LC[S.lang]);
+const $$=v=>(v>=1e6?(v/1e6).toFixed(2)+" M":v.toLocaleString(LC[S.lang],{minimumFractionDigits:v<10?3:2,maximumFractionDigits:v<10?3:2}))+" $";
+const level=()=>T.filter(t=>S.total>=t).length,claims=()=>level()-S.claimed;
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("show"),2200)}
+function log(k,a,x){S.h.unshift({t:Date.now(),k,a,x:x||""});if(S.h.length>60)S.h.length=60}
+function bankChk(){if(S.money>=GOAL){S.money-=GOAL;S.bank+=GOAL;log("bank",GOAL);toast("🏦 "+L("toBank",{n:GOAL}))}}
+function mkSp(){const d=Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5),ty=["taps","earn","login"][d%3];
+ if(ty==="taps")return{ty,k:"taps",g:Math.max(50,Math.round(hourly(S.rl)*2/10)*10),r:80};
+ if(ty==="earn")return{ty,k:"earned",g:+Math.max(.05,tapVal(S.tl)*hourly(S.rl)*2).toFixed(3),r:80};
+ return{ty,k:"login",g:1,r:40}}
+const miss=()=>{if(!S.m.sp)S.m.sp=mkSp();return[{ty:"taps",k:"taps",g:100,r:50},{ty:"buy",k:"buys",g:1,r:30},{ty:"earn",k:"earned",g:.1,r:60},S.m.sp]};
+const ttl=m=>m.ty==="taps"?L("m_taps",{n:nf(m.g)}):m.ty==="buy"?L("m_buy"):m.ty==="earn"?L("m_earn",{n:(+m.g).toFixed(m.g<1?2:0)}):L("m_login");
+function chk(){
+ if(S.cd!==today()){const c=SERVER?0:S.fr.reduce((a,f)=>a+f.d,0)*COMM;if(c>0){S.money+=c;S.total+=c;S.rc+=c;log("ref",c);toast("👥 "+L("refPay",{n:$$(c)}));bankChk()}if(!SERVER)S.fr.forEach(f=>{f.t+=f.d;f.d=0});S.cd=today()}
+ if(S.m.d!==today()){const sc=S.m.earned;if(sc>0&&rk(S.m.d,sc,1.2)<=10){S.energy+=LBD;toast("🏆 "+L("lbPrize",{p:L("lbDay"),n:LBD}));notif("top",{p:"day"})}S.m=mkM()}
+ if(S.wk.k!==wkKey()){if(S.wk.e>0&&rk(String(S.wk.k),S.wk.e,7)<=10){S.energy+=LBW;toast("🏆 "+L("lbPrize",{p:L("lbWeek"),n:LBW}));notif("top",{p:"week"})}S.wk={k:wkKey(),e:0}}
+ const k=hk();if(k>S.hk){S.hk=k;S.energy+=hourly(S.rl);toast("⚡ "+L("hourE",{n:hourly(S.rl)}))}}
+const loginReady=()=>S.last!==today();
+const dayN=()=>loginReady()?(S.last&&new Date(Date.now()-864e5).toDateString()===S.last?S.streak:0)+1:S.streak;
+function earn(g){S.energy--;S.money+=g;S.total+=g;S.m.taps++;S.m.earned+=g;S.wk.e+=g;bankChk()}
+const mul=()=>(S.boost>Date.now()?2:1)*(S.cr&&S.cr.u>Date.now()?S.cr.m:1),gain=()=>tapVal(S.tl)*mul();
+const gcInfo=n=>({s:Math.max(25,Math.round(120*Math.pow(.85,Math.max(0,n-1)))),m:Math.round(120*(1+.25*Math.max(0,n-1)))}),gcEvery=()=>gcInfo(S.gc).s,gcCost=l=>Math.round(20*Math.pow(2.2,l));
+const giftSent=i=>S.gd.d===today()&&S.gd.s.includes(i),pay=(id,f)=>{if(SERVER){buyOrder(id);return}f()};
+function lvlChk(b4){if(level()>b4){toast("🏆 "+L("lvUp",{n:level()}));notif("level",{n:level()})}}
+function fl(x,y,g){const w=$("cw");if(!w)return;const r=w.getBoundingClientRect(),f=document.createElement("div");f.className="fl";f.textContent="+"+Math.round(g*1000);f.style.left=(x==null?r.width/2-14:x-r.left-14)+"px";f.style.top=(y==null?r.height/2-20:y-r.top-20)+"px";w.appendChild(f);setTimeout(()=>f.remove(),800)}
+function coin(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();const t=AC.currentTime,out=AC.destination,base=[1900,2400,2150,2800];[0,.07,.13,.2].forEach((dt,j)=>{const f0=base[j]*(.97+Math.random()*.06);[[1,.11],[2.4,.06],[3.8,.03]].forEach(([r,v])=>{const o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f0*r;g.gain.setValueAtTime(.001,t+dt);g.gain.linearRampToValueAtTime(v,t+dt+.003);g.gain.exponentialRampToValueAtTime(.001,t+dt+(j===3?.5:.2));o.connect(g);g.connect(out);o.start(t+dt);o.stop(t+dt+.52)})})}catch(e){}}
+function critSnd(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();const t=AC.currentTime;[1319,1760,2349,3136].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.001,t+i*.07);g.gain.linearRampToValueAtTime(.16,t+i*.07+.01);g.gain.exponentialRampToValueAtTime(.001,t+i*.07+.35);o.connect(g);g.connect(AC.destination);o.start(t+i*.07);o.stop(t+i*.07+.4)})}catch(e){}}
+function gold(){if(GE&&!GE.isConnected)GE=null;if(!(S.gc>0)||level()<5||tab!=="play"||GE||Date.now()<GN)return;const w=$("cw");if(!w)return;GN=Date.now()+gcEvery()*1e3*(.7+Math.random()*.6);const e=document.createElement("div");e.className="gold";e.textContent="$";e.style.left=(8+Math.random()*72)+"%";e.style.top=Math.random()*65+"%";GE=e;w.appendChild(e);const kill=()=>{e.remove();if(GE===e)GE=null},to=setTimeout(kill,6000);e.addEventListener("pointerdown",ev=>{ev.stopPropagation();ev.preventDefault();clearTimeout(to);const n=Math.round((40+Math.random()*80)*(1+.25*(S.gc-1)));S.energy+=n;kill();toast("🪙 "+L("hourE",{n}));if(!S.mute)critSnd();save();live()})}
+function liveFr(){S.fr.forEach((f,i)=>{const e=$("fd"+i);if(e)e.textContent=L("frToday")+" "+$$(f.d)+" · "+L("frTot")+" "+$$(f.t+f.d)});const e=$("ftn");if(e)e.textContent=$$(S.fr.reduce((a,f)=>a+f.d,0)*COMM)}
+function liveAux(){const e=$("sot");if(e)e.textContent=L("soLeft",{t:fmtT(Math.max(0,S.t0+1728e5-Date.now()))})}
+const soCard=()=>S.so||Date.now()>S.t0+1728e5?"":`<div class="card vault"><b>🎁 ${L("soT")} · ${SO.l}</b><div class="mu">${L("pkD",{e:nf(SO.e),m:SO.m})}</div><div class="row" style="margin-top:8px"><span class="mu" id="sot">${L("soLeft",{t:fmtT(Math.max(0,S.t0+1728e5-Date.now()))})}</span><button class="btn g" data-act="ps">${SO.l}</button></div></div>`;
+const passCard=()=>{const on=S.pass>Date.now(),d=Math.ceil((S.pass-Date.now())/864e5);return`<div class="card vault"><b>⭐ ${L("passT")}</b><div class="mu">${L("passD",{n:PASS_E,m:15})}</div>${on?`<div class="row" style="margin-top:8px"><span class="mu">${L("passLeft",{n:d})}</span><button class="btn g" data-act="pc" ${S.pd===today()?"disabled":""}>${S.pd===today()?L("taken"):L("claim")}</button></div>`:`<div class="row" style="margin-top:8px"><span></span><button class="btn g" data-act="pass">${L("passPer",{p:"4,99 €"})}</button></div>`}</div>`};
+const skinsCard=()=>`<h3>${L("skT")}</h3><div class="mu pad">${L("skD")}</div>`+Object.keys(SK).map(k=>{const s=SK[k],own=S.sk.own.includes(k),g=s?s.g:TH[S.theme||"vert"].slice(3,6);return`<div class="card"><div class="row"><div class="row" style="gap:12px;justify-content:flex-start"><span style="font-size:30px;font-weight:900;background:linear-gradient(160deg,${g[0]},${g[1]},${g[2]});-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">$</span><b>${L("sk_"+k)}</b></div><button class="btn ${own?"":"g"}" data-act="${own?"se_":"sk_"}${k}" ${S.sk.cur===k?"disabled":""}>${S.sk.cur===k?L("skOn"):own?L("skEq"):s.p}</button></div></div>`}).join("");
+const lbBar=()=>`<div class="card"><div class="lg" style="margin:0">${[["day","lbDay"],["week","lbWeek"],["fr","nav_fr"]].map(([k,n])=>`<button data-act="lb_${k}" class="${lbv===k?"on":""}">${L(n)}</button>`).join("")}</div></div>`;
+const board=k=>{if(k==="fr")return[{n:"",s:S.m.earned,me:1},...S.fr.map(f=>({n:f.n,s:f.d}))].sort((a,b)=>b.s-a.s);const d=k==="day";return[{n:"",s:d?S.m.earned:S.wk.e,me:1},...bots(d?today():String(wkKey()),d?1.2:7)].sort((a,b)=>b.s-a.s)};
+function tap(ev){
+ chk();if(S.energy<1){const c=$("coin");c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake");toast(L("noEn"));return}
+ const b4=level();if(S.cx&&!(S.cr&&S.cr.u>Date.now())&&Math.random()<.04){S.cr={u:Date.now()+6e4,m:Math.random()<.7?2:3};toast("✨ "+L("crit",{n:S.cr.m}));if(!S.mute)critSnd()}const g=gain();
+ if(!S.mute)coin();earn(g);fl(ev.clientX,ev.clientY,g);
+ if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}
+ lvlChk(b4);hud();save();if(tab==="play")live()}
+function autoTap(){if(!(S.at>0))return;const g=gain(),b4=level();let n=0;for(let i=0;i<S.at&&S.energy>=1;i++){earn(g);n++}if(n){if(tab==="play"){fl(null,null,g*n);if(!S.mute)coin()}lvlChk(b4);save()}}
+function hud(){$("sol").textContent=L("bal");$("bal").textContent=$$(S.money);$("lvl").textContent=L("lvl",{n:level()})+" · 🏦 "+$$(S.bank)+(S.boost>Date.now()?" · 🔥 x2":"");nav()}
+function nav(){const it=[["play","nav_play"],["shop","nav_shop"],["miss","nav_miss"],["top","nav_top"],["bank","nav_bank"],["prem","nav_prem"]];
+ const dots={prem:S.pass>Date.now()&&S.pd!==today(),miss:claims()>0||loginReady()||(S.ch&&S.chest!==today())||miss().some((m,i)=>(S.m[m.k]||0)>=m.g&&!S.m.c[i]),lvls:claims()>0};
+ $("nav").innerHTML=it.map(([k,n])=>`<button class="${tab===k?"on":""}" data-tab="${k}">${IC[k]}<span>${L(n)}</span>${dots[k]?'<span class="dot"></span>':""}</button>`).join("")}
+function fmtT(ms){const s=Math.floor(ms/1e3),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return(h?h+":":"")+String(m).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function cd(){const ms=(hk()+1)*36e5-Date.now(),m=Math.floor(ms/6e4),s=Math.floor(ms%6e4/1e3);return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+function live(){const e=$("en");if(!e)return;const b=$("eb"),on=S.boost>Date.now(),lv=level(),g=gain();
+ if(S.energy>(S.le||0)||!S.emax)S.emax=Math.max(S.energy,hourly(S.rl));S.le=S.energy;
+ e.textContent="⚡ "+nf(S.energy)+" / "+nf(S.emax);$("cd").textContent=cd();
+ const cr=S.cr&&S.cr.u>Date.now();$("cw").classList.toggle("boost",on);$("cw").classList.toggle("crit",!!cr);$("coin").classList.toggle("empty",S.energy<1);$("bt").textContent=(on?L("boost")+" · "+fmtT(S.boost-Date.now()):"")+(on&&cr?"  ":"")+(cr?"✨ "+L("critT",{n:S.cr.m})+" · "+fmtT(S.cr.u-Date.now()):"");
+ b.style.width=S.energy/S.emax*100+"%";b.style.background=S.energy/S.emax<.2?"var(--red)":"";
+ $("nx").textContent=lv>=100?L("maxLvl"):L("tapsLeft",{n:nf(Math.ceil((T[lv]-S.total)/g)),l:lv+1})}
+function render(){hud();const v=$("view"),g=gain();
+ if(tab==="play"){const lv=level(),nx=T[lv]||T[99],pv=lv?T[lv-1]:0,pr=lv>=100?100:Math.min(100,(S.total-pv)/(nx-pv)*100);
+  v.innerHTML=`<div class="coinw${S.boost>Date.now()?" boost":""}${S.cr&&S.cr.u>Date.now()?" crit":""}" id="cw" style="${skinStyle()}"><button class="coin" id="coin">$</button></div><div id="bt" class="bt"></div>
+  <div class="pad"><div class="row"><b id="en" style="font-size:20px"></b><span class="mu">${L("nextE")} <b id="cd"></b></span></div>
+  <div class="bar" style="margin-top:6px"><i id="eb"></i></div>
+  <div class="mu" id="nx" style="margin-top:6px;font-weight:600"></div>
+  <div class="mu" style="margin-top:4px">${L("perH",{n:hourly(S.rl)})} · ${L("tapIs",{n:Math.round(g*1000)})} (${$$(g)})${S.at?" · "+L("autoOn",{n:S.at}):""}</div></div>
+  <div class="card"><div class="row"><span>${L("nextTier")} : <b>${lv>=100?"MAX":$$(nx)}</b></span><span class="mu">${pr.toFixed(0)}%</span></div><div class="bar" style="margin-top:8px"><i style="width:${pr}%"></i></div></div>`;
+  $("coin").addEventListener("pointerdown",e=>{e.preventDefault();tap(e)});live()}
+ if(tab==="shop"){const lock=level()<AUTO_LV,lockG=level()<5,lockC=level()<3,lockX=level()<7;v.innerHTML=`<h3>${L("shopT")}</h3>
+  <div class="card"><div class="row"><div><b>${L("tapV")}</b> (${L("lv",{n:S.tl})})<div class="mu">${L("perTap",{a:$$(tapVal(S.tl)),b:$$(tapVal(S.tl+1))})}</div></div><button class="btn" data-buy="tl" ${S.money<tapCost(S.tl)?"disabled":""}>${$$(tapCost(S.tl))}</button></div></div>
+  <div class="card"><div class="row"><div><b>${L("enH")}</b> (${L("lv",{n:S.rl})})<div class="mu">${L("enHa",{a:hourly(S.rl),b:hourly(S.rl+1)})}</div></div><button class="btn" data-buy="rl" ${S.money<regCost(S.rl)?"disabled":""}>${$$(regCost(S.rl))}</button></div></div>
+  <div class="card"><div class="row"><div><b>${L("auto")}</b> (${L("lv",{n:S.at})})<div class="mu">${lock?"🔒 "+L("autoLock"):L("autoD",{a:S.at,b:S.at+1})}</div></div><button class="btn" data-buy="at" ${lock||S.money<AUTO_COST?"disabled":""}>${$$(AUTO_COST)}</button></div></div>
+  <div class="card"><div class="row"><div><b>🪙 ${L("gcT")}</b> (${L("lv",{n:S.gc})})<div class="mu">${lockG?"🔒 "+L("gcLock"):L("gcD",{s:gcInfo(S.gc+1).s,m:gcInfo(S.gc+1).m})}</div></div><button class="btn" data-buy="gc" ${lockG||S.money<gcCost(S.gc)?"disabled":""}>${$$(gcCost(S.gc))}</button></div></div>
+  <div class="card"><div class="row"><div><b>🎁 ${L("chestT")}</b><div class="mu">${S.ch?"✅ "+L("owned"):lockC?"🔒 "+L("lockN",{n:3}):L("chD")}</div></div><button class="btn" data-buy="ch" ${S.ch||lockC||S.money<CH_COST?"disabled":""}>${S.ch?L("owned"):$$(CH_COST)}</button></div></div>
+  <div class="card"><div class="row"><div><b>✨ ${L("cxT")}</b><div class="mu">${S.cx?"✅ "+L("owned"):lockX?"🔒 "+L("lockN",{n:7}):L("cxD")}</div></div><button class="btn" data-buy="cx" ${S.cx||lockX||S.money<CX_COST?"disabled":""}>${S.cx?L("owned"):$$(CX_COST)}</button></div></div>
+  <div class="mu pad" style="margin-top:8px">${L("shopNote")}</div>`}
+ if(tab==="miss"){const d=dayN(),rd=n=>n===7?200:n*30,ms=miss(),cardM=(m,i)=>{const p=Math.min(S.m[m.k]||0,m.g),ok=p>=m.g;return`<div class="card"><div class="row"><div><b>${ttl(m)}</b><div class="mu">${m.k==="earned"?p.toFixed(3)+" / "+(+m.g).toFixed(3):nf(p)+" / "+nf(m.g)} · ${L("rew",{n:m.r})}</div></div><button class="btn" data-act="m${i}" ${ok&&!S.m.c[i]?"":"disabled"}>${S.m.c[i]?L("claimed"):L("claim")}</button></div><div class="bar" style="margin-top:8px"><i style="width:${p/m.g*100}%"></i></div></div>`};
+  v.innerHTML=`${S.ch?`<h3>${L("chestT")}</h3><div class="card"><div class="row"><div class="mu">${L("chestD")}</div><button class="btn g" data-act="chest" ${S.chest===today()?"disabled":""}>${S.chest===today()?L("taken"):L("chestOpen")}</button></div></div>`:`<div class="mu pad" style="margin-top:12px">🔒 ${L("chLock")}</div>`}<h3>${L("daily")}</h3><div class="card"><div class="row"><div><b>${L("streak",{n:S.streak})}</b><div class="mu">${L("comeBack")}</div></div>
+  <button class="btn g" data-act="login" ${loginReady()?"":"disabled"}>${loginReady()?"+"+rd(d)+" ⚡":L("taken")}</button></div>
+  <div class="days">${[1,2,3,4,5,6,7].map(n=>`<div class="${n<=(loginReady()?d-1:d)?"d":""} ${loginReady()&&n===d?"n":""}">J${n}<br>${rd(n)}</div>`).join("")}</div></div>
+  <h3>${L("dm")}</h3>${ms.slice(0,3).map((m,i)=>cardM(m,i)).join("")}<h3>⭐ ${L("spM")}</h3>${cardM(ms[3],3)}
+  <h3>${L("ref")}</h3><div class="card"><b>${L("inv5")}</b><div class="mu">${L("then60")}</div><div class="bar" style="margin:8px 0"><i style="width:${Math.min(100,S.fr.length/5*100)}%"></i></div><div class="mu" style="margin:4px 0 8px">${L("invd",{n:S.fr.length<5?S.fr.length+" / 5":S.fr.length})} · ${L("code")} : <b>${S.code}</b></div>
+  <div class="row"><button class="btn" data-act="copy">${L("copyL")}</button>${SERVER?"":`<button class="btn g" data-act="friend">${L("sim")}</button>`}</div></div>
+  <div class="mu pad" style="margin-top:6px">${L("pct5")}</div>
+  <h3>${L("bon")}</h3><div class="card"><b>📧 ${L("mailB")}</b>${S.email?`<div class="mu">✅ ${L("saved")}</div>`:`<div class="row" style="margin-top:8px"><input id="em" type="email" placeholder="you@email.com" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)"><button class="btn" data-act="mail">${L("ok")}</button></div><label class="mu" style="display:block;margin-top:6px"><input type="checkbox" id="cs"> ${L("consent")}</label>`}</div>
+  <div class="card"><div class="row"><div><b>📣 ${L("tgB")}</b><div class="mu">${L("tgD")}</div></div><button class="btn g" data-act="tg" ${S.tg?"disabled":""}>${S.tg?L("done"):L("join")}</button></div></div>`;v.innerHTML+=lvlsHTML()}
+ if(tab==="top"&&lbv==="fr"){const tn=S.fr.reduce((a,f)=>a+f.d,0)*COMM;
+  v.innerHTML=`<h3>${L("nav_top")}</h3>${lbBar()}<h3>${L("frT")}</h3><div class="card"><div class="row"><b>${L("frN",{n:S.fr.length})}</b><span class="row" style="gap:6px"><button class="btn" data-act="copy">${L("copyL")}</button>${SERVER?"":`<button class="btn g" data-act="friend">+</button>`}</span></div>
+  <div class="row mu" style="margin-top:10px"><span>${L("frTonight")}</span><b id="ftn">${$$(tn)}</b></div><div class="row mu"><span>${L("frRecv")}</span><b>${$$(S.rc)}</b></div></div>
+  ${S.fr.length?S.fr.map((f,i)=>`<div class="card"><div class="row"><b>👤 ${f.n}</b><button class="btn" data-act="g${i}" ${giftSent(i)?"disabled":""}>${giftSent(i)?L("giftDone"):L("gift",{n:GIFT})}</button></div><div class="mu" style="margin-top:6px" id="fd${i}">${L("frToday")} ${$$(f.d)} · ${L("frTot")} ${$$(f.t+f.d)}</div></div>`).join(""):`<div class="card mu">${L("noFr")}</div>`}
+  <div class="mu pad" style="margin-top:8px">${L("pct5")}</div><div class="demo">${L("frDemo")}</div>`}
+ if(tab==="top"&&lbv!=="fr"){const bd=board(lbv),me=bd.findIndex(x=>x.me),show=(x,i)=>`<div class="lv" ${x.me?'style="font-weight:800;color:var(--ac)"':""}><span>${i<3?["🥇","🥈","🥉"][i]:(i+1)+"."} ${x.me?L("lbYou"):x.n}</span><b>${$$(x.s)}</b></div>`;
+  v.innerHTML=`<h3>${L("nav_top")}</h3>${lbBar()}<div class="card">${bd.slice(0,10).map(show).join("")}${me>=10?`<div class="mu" style="text-align:center">…</div>${show(bd[me],me)}`:""}</div><div class="mu pad">${L("lbRank",{n:me+1})} · ${L("lbRew",{a:LBD,b:LBW})}</div><div class="demo">${L("lbDemo")}</div>`}
+ function lvlsHTML(){const c=claims(),lv=level();let rows="";for(let i=0;i<100;i++)rows+=`<div class="lv"><span>${i<lv?"✅":"🔒"} ${L("lvN",{n:i+1})} · ${$$(T[i])}</span><span>+${nf(lvReward(i))} ⚡</span></div>`;
+  return`<h3>${L("tiers",{a:lv})}</h3><div class="card"><div class="row"><span>${c>0?L("toClaim",{n:c}):L("noRew")}</span><button class="btn g" data-act="lvl" ${c>0?"":"disabled"}>${L("claimAll")}</button></div></div><div class="card">${rows}</div>`}
+ if(tab==="bank"){const pc=Math.min(100,S.money/GOAL*100),fm=x=>new Date(x).toLocaleString(LC[S.lang],{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+  v.innerHTML=`<div class="card vault" style="text-align:center"><div class="mu">${L("bankA")}</div><div style="font-size:34px;font-weight:800;color:var(--ac)">${$$(S.bank)}</div><div class="mu">${L("wdFrom",{n:nf(GOAL)})}</div><button class="btn g" style="margin-top:10px" data-act="wd" ${S.bank>=GOAL?"":"disabled"}>${L("wd")}</button></div>
+  <div class="card"><div class="row"><b>${L("nextTr")}</b><span class="mu">${pc.toFixed(2)}%</span></div><div class="bar" style="margin-top:8px"><i style="width:${pc}%"></i></div><div class="mu" style="margin-top:8px">${L("bankN",{n:nf(GOAL)})}</div></div>
+  <h3>${L("hist")}</h3><div class="card">${S.h.length?S.h.map(x=>`<div class="lv"><span>${L("h_"+x.k,{x:x.x})}<div class="mu">${fm(x.t)}</div></span><b style="color:${x.a>0?"var(--ac)":"var(--red)"}">${x.a?(x.a>0?"+":"−")+$$(Math.abs(x.a)):""}</b></div>`).join(""):`<div class="mu">${L("noOps")}</div>`}</div>`}
+ if(tab==="prem"){const lv=level();
+  v.innerHTML=`${PAY_LIVE?"":`<div class="demo">${L("test")}</div>`}${soCard()}${passCard()}<h3>${L("packs")}</h3>
+  <div class="mu pad">${L("adapt",{n:lv})}</div>${PACKS.map((p,i)=>`<div class="card"><div class="row"><div><b>${L("pk",{l:p.l})}</b><div class="mu">${p.m?L("pkD",{e:nf(p.e*(1+lv/20)),m:p.m}):"+"+nf(p.e)+" ⚡"}</div></div><button class="btn g" data-act="p${i}">${p.l}</button></div></div>`).join("")}${skinsCard()}`}
+}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-tab],[data-buy],[data-act]");if(!t)return;chk();
+ if(t.dataset.tab){tab=t.dataset.tab;render();return}
+ if(t.dataset.buy){const k=t.dataset.buy,c=k==="tl"?tapCost(S.tl):k==="rl"?regCost(S.rl):k==="gc"?gcCost(S.gc):k==="ch"?CH_COST:k==="cx"?CX_COST:AUTO_COST;if(S.money>=c&&(k!=="at"||level()>=AUTO_LV)&&(k!=="gc"||level()>=5)&&(k!=="ch"||(level()>=3&&!S.ch))&&(k!=="cx"||(level()>=7&&!S.cx))){S.money-=c;S[k]++;S.m.buys++;log(k,-c);if(k==="gc")GN=Date.now()+8e3;toast(L("bought"))}}
+ const a=t.dataset.act;
+ if(a==="login"&&loginReady()){const d=dayN(),r=d===7?200:d*30;S.streak=d;S.last=today();S.m.login=1;S.energy+=r;toast("🎁 "+L("hourE",{n:r}));if(d===7)S.streak=0}
+ if(a&&/^m\d$/.test(a)){const i=+a[1],m=miss()[i];if((S.m[m.k]||0)>=m.g&&!S.m.c[i]){S.m.c[i]=1;S.energy+=m.r;toast("🎯 "+L("hourE",{n:m.r}))}}
+ if(a==="lvl"){let n=0;while(S.claimed<level()){n+=lvReward(S.claimed);S.claimed++}S.energy+=n;toast("🏆 "+L("hourE",{n:nf(n)}))}
+ if(a==="mail"&&!S.email){const v=$("em").value.trim();if(!/^\S+@\S+\.\S+$/.test(v)||!$("cs").checked){toast(L("mailBad"));return}S.email=v;S.energy+=150;toast("📧 "+L("hourE",{n:150}))}
+ if(a==="tg"&&!S.tg){S.tg=1;S.energy+=500;try{window.open("https://t.me/TonCanal","_blank")}catch(x){}toast("📣 "+L("hourE",{n:500}))}
+ if(a==="wd")toast(PAYOUT_REAL?"OK":L("noWd"));
+ if(a==="friend"){const N=["Léa","Hugo","Emma","Noah","Chloé","Lucas","Inès","Tom"],r=Math.random()*.1+.03,c=S.fr.length+1;S.fr.push({n:N[(c-1)%8]+(c>8?" "+c:""),t:0,d:+(r*3).toFixed(3),r});const rw=c===5?400:c>5?60:0;S.energy+=rw;toast("👥 "+L("friendJ")+" "+(rw?L("hourE",{n:rw}):c+" / 5"))}
+ if(a==="copy"){const l=refLink();try{navigator.clipboard.writeText(l)}catch(x){}toast(L("copied",{l}));if(TG&&TG.openTelegramLink&&BOTU)try{TG.openTelegramLink("https://t.me/share/url?url="+encodeURIComponent(l))}catch(x){}}
+ if(a&&/^p\d$/.test(a)){const p=PACKS[+a[1]];if(SERVER){buyOrder(a);return}const q=Math.round(p.m?p.e*(1+level()/20):p.e);S.energy+=q;S.boost=Math.max(S.boost,Date.now())+p.m*6e4;log("pack",0,p.l);toast("💎 "+L("pkT",{l:p.l,e:nf(q)}))}
+ if(a==="chest"&&S.ch&&S.chest!==today()){S.chest=today();const r=Math.random();let m;if(r<.7){const n=40+Math.floor(Math.random()*111);S.energy+=n;m=L("hourE",{n})}else if(r<.95){const g=+(.02+Math.random()*.06).toFixed(3);S.money+=g;S.total+=g;bankChk();m=$$(g)}else{S.boost=Math.max(S.boost,Date.now())+18e4;m=L("boost")+" · 3 min"}toast("🎁 "+L("chestToast",{r:m}))}
+ if(a&&/^g\d+$/.test(a)){const i=+a.slice(1);if(S.fr[i]&&!giftSent(i)){if(S.energy<GIFT){toast(L("noEn"));return}S.energy-=GIFT;if(S.gd.d!==today())S.gd={d:today(),s:[]};S.gd.s.push(i);toast("🎁 "+L("giftSent",{n:S.fr[i].n}))}}
+ if(a&&a.startsWith("lb_"))lbv=a.slice(3);
+ if(a==="ps"&&!S.so)pay("so",()=>{S.so=1;S.energy+=SO.e;S.boost=Math.max(S.boost,Date.now())+SO.m*6e4;log("pack",0,SO.l);toast("💎 "+L("pkT",{l:SO.l,e:nf(SO.e)}))});
+ if(a==="pass")pay("pass",()=>{S.pass=Math.max(S.pass,Date.now())+30*864e5;log("pack",0,"Pass");toast("⭐ "+L("passT"))});
+ if(a==="pc"&&S.pass>Date.now()&&S.pd!==today()){S.pd=today();S.pn++;S.energy+=PASS_E;let b="";if(S.pn%7===0){S.boost=Math.max(S.boost,Date.now())+9e5;b=" + "+L("boost")}toast("⭐ "+L("hourE",{n:PASS_E})+b)}
+ if(a&&/^sk_/.test(a)){const k=a.slice(3);if(SK[k]&&!S.sk.own.includes(k))pay("sk_"+k,()=>{S.sk.own.push(k);S.sk.cur=k;log("pack",0,L("sk_"+k));toast("✨ "+L("sk_"+k))})}
+ if(a&&/^se_/.test(a)){const k=a.slice(3);if(S.sk.own.includes(k))S.sk.cur=k}
+ applyTheme();save();render()});
+const TH={vert:["Vert","#22b866","51,184,102","#b4ffd2","#2fd37c","#0f7a40"],bleu:["Bleu","#3b82f6","59,130,246","#c7ddff","#4f9bff","#1d4fb8"],rouge:["Rouge","#ef4444","239,68,68","#ffd0d0","#ff5c5c","#a31515"],violet:["Violet","#8b5cf6","139,92,246","#e0d4ff","#9d78ff","#5521c4"],jaune:["Jaune","#eab308","234,179,8","#fff3b0","#f5c518","#a67c00"],orange:["Orange","#f97316","249,115,22","#ffd9b8","#ff8a3d","#b84a00"],noir:["Noir","#d4d4d8","212,212,216","#ffffff","#d4d4d8","#71717a"],blanc:["Blanc","#111827","17,24,39","#6b7280","#1f2937","#000000"]};
+function applyTheme(){const r=document.documentElement,k=S.theme||"vert",t=TH[k]||TH.vert,st=r.style;r.lang=S.lang;["--ac","--rgb","--g1","--g2","--g3","--bg","--card","--bd","--btn"].forEach(p=>st.removeProperty(p));st.setProperty("--ac",t[1]);st.setProperty("--rgb",t[2]);st.setProperty("--g1",t[3]);st.setProperty("--g2",t[4]);st.setProperty("--g3",t[5]);{const sk=S.sk&&SK[S.sk.cur];if(sk){st.setProperty("--g1",sk.g[0]);st.setProperty("--g2",sk.g[1]);st.setProperty("--g3",sk.g[2]);st.setProperty("--rgb",sk.rgb)}}if(k==="noir"){r.dataset.theme="dark";st.setProperty("--bg","#000");st.setProperty("--card","#121212");st.setProperty("--bd","#262626");st.setProperty("--btn","#111")}else if(k==="blanc"){r.dataset.theme="light";st.setProperty("--bg","#fff");st.setProperty("--card","#f4f4f5");st.setProperty("--bd","#e4e4e7")}else{delete r.dataset.theme;if(k==="jaune")st.setProperty("--btn","#2b2000")}}
+function resetAll(){S=Object.assign(fresh(),{theme:S.theme,mute:S.mute,lang:S.lang});save();render()}
+function openCfg(){const o=$("ov");o.innerHTML=`<div class="sheet"><div class="row"><b style="font-size:18px">${L("set")}</b><button class="btn" data-cfg="close" style="background:var(--bd);color:var(--tx)">${L("close")}</button></div>
+ <div class="mu" style="margin-top:12px">${L("lang")}</div><div class="lg">${LG.map(k=>`<button data-cfg="lg:${k}" class="${S.lang===k?"on":""}">${FL[k]} ${LN[k]}</button>`).join("")}</div>
+ <div class="mu">${L("col")}</div><div class="sw">${Object.keys(TH).map(k=>`<button title="${TH[k][0]}" data-cfg="th:${k}" class="${(S.theme||"vert")===k?"on":""}" style="background:${k==="noir"?"#000":k==="blanc"?"#fff":TH[k][1]}"></button>`).join("")}</div>
+ <div class="sr"><span>${L("snd")}</span><button class="btn" data-cfg="snd">${S.mute?L("off"):L("on")}</button></div>
+ <div class="sr"><span>${L("notif")}</span><button class="btn" data-cfg="notif">${S.notif?L("on"):L("off")}</button></div>
+ <div class="sr"><span>${L("rstT")}<div class="mu">${L("rstD")}</div></span><button class="btn red" data-cfg="rst">${RC?L("conf"):L("rstB")}</button></div></div>`;o.classList.add("on")}
+document.addEventListener("click",e=>{const o=$("ov");if(e.target===o){RC=0;o.classList.remove("on");return}const t=e.target.closest("[data-cfg]");if(!t)return;const c=t.dataset.cfg;
+ if(c==="close"){RC=0;o.classList.remove("on");return}if(c==="open"){RC=0;openCfg();return}
+ if(c.startsWith("th:")){S.theme=c.slice(3);applyTheme();save();openCfg();return}
+ if(c.startsWith("lg:")){S.lang=c.slice(3);applyTheme();save();openCfg();render();return}
+ if(c==="snd"){S.mute=!S.mute;save();openCfg();return}
+ if(c==="notif"){S.notif=S.notif?0:1;save();openCfg();return}
+ if(c==="rst"){if(!RC){RC=1;openCfg();return}RC=0;resetAll();o.classList.remove("on");toast(L("reset"))}});
+applyTheme();chk();render();boot();
+setInterval(()=>{const k=S.hk,dd=S.cd;chk();if(!SERVER)S.fr.forEach(f=>f.d+=f.r/14400*Math.random()*2);autoTap();if(S.hk!==k||S.cd!==dd){save();render()}else if(tab==="top"&&lbv==="fr")liveFr();else live();liveAux();gold();hud();if(++SV%15===0)save()},1000);
+</script><script>if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0)navigator.serviceWorker.register("sw.js").catch(function(){})</script>
+</body></html>
